@@ -7,35 +7,44 @@
 #include <tchar.h>
 using namespace std;
 
-struct Point {
+struct Point
+{
 	int x = 0, y = 0;
 };
-class Graph {
+class Graph
+{
 public:
-	bool** roads;	
-	Point* coords;	
-	int	p, 
-		d;	
+	bool **roads;
+	Point *coords;
+	int p,
+		d;
 
-	Graph(string path) {
+	Graph(string path)
+	{
 		int x, y, from, to;
 		ifstream file(path);
-		if (file) {
+		if (file)
+		{
 			file >> p;
-			roads = new bool*[p];
-			for (int i = 0; i < p; i++) roads[i] = new bool[p];
-			for (int i = 0; i < p; i++) {
-				for (int j = 0; j < p; j++) {
+			roads = new bool *[p];
+			for (int i = 0; i < p; i++)
+				roads[i] = new bool[p];
+			for (int i = 0; i < p; i++)
+			{
+				for (int j = 0; j < p; j++)
+				{
 					roads[i][j] = false;
 				}
 			}
 			coords = new Point[p];
-			for (int i = 0; i < p; i++) {
+			for (int i = 0; i < p; i++)
+			{
 				file >> x >> y;
-				coords[i] = { x,y };
+				coords[i] = {x, y};
 			}
 			file >> d;
-			for (int i = 0; i < d; i++) {
+			for (int i = 0; i < d; i++)
+			{
 				file >> from >> to;
 				roads[from - 1][to - 1] = true;
 				roads[to - 1][from - 1] = true;
@@ -43,31 +52,38 @@ public:
 
 			file.close();
 		}
-		else {
-			MessageBox(NULL, L"Не удается открыть файл \"graph.txt\"! Проверьте наличие файла", L"Ошибка", 0);
+		else
+		{
+			MessageBox(NULL, L"РќРµ СѓРґР°РµС‚СЃСЏ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»  \"graph.txt\"! РџСЂРѕРІРµСЂСЊС‚Рµ РЅР°Р»РёС‡РёРµ С„Р°Р№Р»Р°", L"РћС€РёР±РєР°", 0);
 			exit(0);
 		}
-
 	}
 	//----------------------------------------------------------------------------------------------------------------------------------------
-	bool Deactivate(int from, int to) {
-		if (from <= p && to <= p && from > 0 && to > 0) {
+	bool Deactivate(int from, int to)
+	{
+		if (from <= p && to <= p && from > 0 && to > 0)
+		{
 			int count = 0;
 			stack<int> s;
-			bool* used = new bool[p];
+			bool *used = new bool[p];
 
 			roads[from - 1][to - 1] = false;
 			roads[to - 1][from - 1] = false;
-			for (int i = 0; i < p; i++) used[i] = false;
+			for (int i = 0; i < p; i++)
+				used[i] = false;
 			s.push(0);
 
-			do {
+			do
+			{
 				int cur = s.top();
 				s.pop();
 				used[cur] = true;
-				for (int i = 0; i < p; i++) {
-					if (cur == i) continue;
-					if (roads[cur][i] && !used[i]) {
+				for (int i = 0; i < p; i++)
+				{
+					if (cur == i)
+						continue;
+					if (roads[cur][i] && !used[i])
+					{
 						s.push(i);
 						used[i] = true;
 					}
@@ -76,17 +92,20 @@ public:
 			} while (!s.empty());
 			delete[] used;
 
-			if (count < p) {
+			if (count < p)
+			{
 				roads[from - 1][to - 1] = true;
 				roads[to - 1][from - 1] = true;
 				return false;
 			}
-			else {
+			else
+			{
 				d--;
 				return true;
 			}
 		}
-		else return false;
+		else
+			return false;
 	}
 };
 
@@ -96,53 +115,55 @@ public:
 #define IDC_EDIT2 102
 const int diametr = 20;
 
-
 Graph g("graph.txt");
 HWND hWnd;
 HWND button1;
 HWND edit1, edit2;
 static TCHAR szWindowClass[] = _T("DesktopApp");
 static TCHAR szTitle[] = _T("Road Manager");
-HINSTANCE hInst; // Это адрес, по которому модуль размещен в памяти
+HINSTANCE hInst; // Р­С‚Рѕ Р°РґСЂРµСЃ, РїРѕ РєРѕС‚РѕСЂРѕРјСѓ РјРѕРґСѓР»СЊ СЂР°Р·РјРµС‰РµРЅ РІ РїР°РјСЏС‚Рё
 HDC DC;
 
-
-void DrawGraph() {
+void DrawGraph()
+{
 	DC = GetDC(hWnd);
-	HPEN Pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));   // Идет   
-	HPEN OldPen = (HPEN)SelectObject(DC, Pen);           // закраска
-	HBRUSH Brush = CreateSolidBrush(RGB(255, 0, 0));        // фоновым
-	HBRUSH OldBrush = (HBRUSH)SelectObject(DC, Brush);         // цветом
+	HPEN Pen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));   // РРґРµС‚
+	HPEN OldPen = (HPEN)SelectObject(DC, Pen);		   // Р—Р°РєСЂР°СЃРєР°
+	HBRUSH Brush = CreateSolidBrush(RGB(255, 0, 0));   // Р¤РѕРЅРѕРІС‹Рј
+	HBRUSH OldBrush = (HBRUSH)SelectObject(DC, Brush); // Р¦РІРµС‚РѕРј
 
-	for (int i = 0; i < g.p; i++) {
-		int	fromX = g.coords[i].x,
-					fromY = g.coords[i].y;
+	for (int i = 0; i < g.p; i++)
+	{
+		int fromX = g.coords[i].x,
+			fromY = g.coords[i].y;
 
 		Ellipse(DC, fromX, fromY, fromX + diametr, fromY + diametr);
 
-		wstring out = to_wstring(i+1);
+		wstring out = to_wstring(i + 1);
 		TextOut(DC, fromX, fromY - diametr, out.c_str(), out.length());
 
-		for (int j = i; j < g.p; j++) {
-			int	toX = g.coords[j].x,
-						toY = g.coords[j].y;
-			if (g.roads[i][j]) {
+		for (int j = i; j < g.p; j++)
+		{
+			int toX = g.coords[j].x,
+				toY = g.coords[j].y;
+			if (g.roads[i][j])
+			{
 				MoveToEx(DC, fromX + diametr / 2, fromY + diametr / 2, NULL);
 				LineTo(DC, toX + diametr / 2, toY + diametr / 2);
 			}
 		}
 	}
 
-	SelectObject(DC, OldPen); // Относится к созданию теневого контекста для двойной буферизации
-	DeleteObject(Pen); // Удаляем ненужные системные объекты
+	SelectObject(DC, OldPen); // РћС‚РЅРѕСЃРёС‚СЃСЏ Рє СЃРѕР·РґР°РЅРёСЋ С‚РµРЅРµРІРѕРіРѕ РєРѕРЅС‚РµРєСЃС‚Р° РґР»СЏ РґРІРѕР№РЅРѕР№ Р±СѓС„РµСЂРёР·Р°С†РёРё
+	DeleteObject(Pen);		  // РЈРґР°Р»СЏРµРј РЅРµРЅСѓР¶РЅС‹Рµ СЃРёСЃС‚РµРјРЅС‹Рµ РѕР±СЉРµРєС‚С‹
 	SelectObject(DC, OldBrush);
-	DeleteObject(Brush); // Удаляем ненужные системные объекты
+	DeleteObject(Brush); // РЈРґР°Р»СЏРµРј РЅРµРЅСѓР¶РЅС‹Рµ СЃРёСЃС‚РµРјРЅС‹Рµ РѕР±СЉРµРєС‚С‹
 
 	ReleaseDC(hWnd, DC);
 }
 
-
-void button_click() {
+void button_click()
+{
 	TCHAR buf1[6];
 	TCHAR buf2[6];
 	int from, to;
@@ -150,13 +171,14 @@ void button_click() {
 	GetWindowText(edit2, buf2, lstrlen(buf2));
 	from = stoi(buf1);
 	to = stoi(buf2);
-	if (g.Deactivate(from, to)) {
-		MessageBox(hWnd, L"Дорога закрыта", L"Удалось!", 0);
+	if (g.Deactivate(from, to))
+	{
+		MessageBox(hWnd, L"Р”РѕСЂРѕРіР° Р·Р°РєСЂС‹С‚Р°", L"РЈРґР°Р»РѕСЃСЊ!", 0);
 		InvalidateRect(hWnd, NULL, TRUE);
 	}
-	else MessageBox(hWnd, L"Такой дороги нет", L"Увы!", 0);
+	else
+		MessageBox(hWnd, L"РўР°РєРѕР№ РґРѕСЂРѕРіРё РЅРµС‚", L"РЈРІС‹!", 0);
 }
-
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -170,7 +192,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_COMMAND:
-		switch (wParam) {
+		switch (wParam)
+		{
 		case IDC_BUTTON1:
 			button_click();
 			break;
@@ -186,12 +209,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-//2D графика на основе WinApi C++
+// 2D РіСЂР°С„РёРєР° РЅР° РѕСЃРЅРѕРІРµ WinApi C++
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wcex;
 	hInst = hInstance;
-	//Заполняем структуру класса окна
+	//Р—Р°РїРѕР»РЅСЏРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ РєР»Р°СЃСЃР° РѕРєРЅР°
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = WndProc;
@@ -204,29 +227,29 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
-	// Регистрируем класс окна
+	// Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РєР»Р°СЃСЃ РѕРєРЅР°
 	if (!RegisterClassEx(&wcex))
 	{
 		MessageBox(NULL,
-			_T("Call to RegisterClassEx failed!"),
-			_T("Windows Desktop Guided Tour"),
-			NULL);
+				   _T("Call to RegisterClassEx failed!"),
+				   _T("Windows Desktop Guided Tour"),
+				   NULL);
 
 		return 1;
 	}
 
 	hInst = hInstance;
-	// Создаем основное окно приложения
-	hWnd = CreateWindow(    
+	// РЎРѕР·РґР°РµРј РѕСЃРЅРѕРІРЅРѕРµ РѕРєРЅРѕ РїСЂРёР»РѕР¶РµРЅРёСЏ
+	hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
-		WS_OVERLAPPEDWINDOW,            // Стиль окна 
-		CW_USEDEFAULT, CW_USEDEFAULT,   // Константы позволяют задать значения по умолчанию для размеров и позиций окна
+		WS_OVERLAPPEDWINDOW,		  // РЎС‚РёР»СЊ РѕРєРЅР°
+		CW_USEDEFAULT, CW_USEDEFAULT, // РљРѕРЅСЃС‚Р°РЅС‚С‹ РїРѕР·РІРѕР»СЏСЋС‚ Р·Р°РґР°С‚СЊ Р·РЅР°С‡РµРЅРёСЏ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РґР»СЏ СЂР°Р·РјРµСЂРѕРІ Рё РїРѕР·РёС†РёР№ РѕРєРЅР°
 		800, 600,
-		NULL,                         // Указатель на родительское окно NULL 
-		NULL,                         // Используется меню класса окна 
-		hInst,                        // Указатель на текущее приложение
-		NULL                          // Передается в качестве lParam в событие WM_CREATE
+		NULL,  // РЈРєР°Р·Р°С‚РµР»СЊ РЅР° СЂРѕРґРёС‚РµР»СЊСЃРєРѕРµ РѕРєРЅРѕ NULL
+		NULL,  // РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РјРµРЅСЋ РєР»Р°СЃСЃР° РѕРєРЅР°
+		hInst, // РЈРєР°Р·Р°С‚РµР»СЊ РЅР° С‚РµРєСѓС‰РµРµ РїСЂРёР»РѕР¶РµРЅРёРµ
+		NULL   // РџРµСЂРµРґР°РµС‚СЃСЏ РІ РєР°С‡РµСЃС‚РІРµ lParam РІ СЃРѕР±С‹С‚РёРµ WM_CREATE
 	);
 	edit1 = CreateWindow(
 		L"edit",
@@ -237,44 +260,41 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		hWnd,
 		(HMENU)IDC_EDIT1,
 		hInst,
-		NULL
-	);
+		NULL);
 	edit2 = CreateWindow(
 		L"edit",
 		L"",
-		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, // Стили окон
+		WS_CHILD | WS_VISIBLE | WS_BORDER | ES_AUTOHSCROLL, // РЎС‚РёР»Рё РѕРєРѕРЅ
 		50, 0,
 		50, 20,
 		hWnd,
 		(HMENU)IDC_EDIT2,
 		hInst,
-		NULL
-	);
+		NULL);
 	button1 = CreateWindow(
 		L"button",
-		L"Закрыть дорогу",
+		L"Р—Р°РєСЂС‹С‚СЊ РґРѕСЂРѕРіСѓ",
 		WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON,
 		100, 0,
 		150, 20,
 		hWnd,
 		(HMENU)IDC_BUTTON1,
 		hInst,
-		NULL
-	);
+		NULL);
 
 	if (!hWnd)
 	{
 		MessageBox(NULL,
-			_T("Call to CreateWindow failed!"),
-			_T("Windows Desktop Guided Tour"),
-			NULL);
+				   _T("Call to CreateWindow failed!"),
+				   _T("Windows Desktop Guided Tour"),
+				   NULL);
 
 		return 1;
 	}
-	// Показываем наше окно
+	// РџРѕРєР°Р·С‹РІР°РµРј РЅР°С€Рµ РѕРєРЅРѕ
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
-	// Выполняем цикл обработки сообщений до закрытия приложения
+	// Р’С‹РїРѕР»РЅСЏРµРј С†РёРєР» РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№ РґРѕ Р·Р°РєСЂС‹С‚РёСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ
 	MSG msg;
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
